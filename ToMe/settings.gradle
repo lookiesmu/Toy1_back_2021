@@ -1,0 +1,4 @@
+rootProject.name = 'tome'
+include 'API'
+include 'Domain'
+
