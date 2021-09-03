@@ -1,20 +1,20 @@
 package com.lookie.toy1_back.tome.domain;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.*;
 
 import javax.persistence.*;
 import java.io.Serializable;
 
 @Entity
 @Table
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @Data
-public class Answer implements Serializable {
+public class Answer extends BaseTime implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -22,11 +22,11 @@ public class Answer implements Serializable {
     @Column
     private String content;
 
-    @OneToOne(fetch =  FetchType.EAGER)
-    @JoinColumn(columnDefinition = "user_id")
-    private User user;
-
-    @OneToOne(fetch =  FetchType.EAGER)
-    @JoinColumn(columnDefinition = "question_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JsonBackReference
     private Question question;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JsonBackReference
+    private User user;
 }

@@ -1,20 +1,23 @@
 package com.lookie.toy1_back.tome.domain;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import lombok.*;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @Data
-public class Question implements Serializable {
+public class Question extends BaseTime implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -22,7 +25,11 @@ public class Question implements Serializable {
     @Column
     private String content;
 
-    @OneToOne(fetch =  FetchType.EAGER)
-    @JoinColumn(columnDefinition = "user_id")
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JsonIgnore
+    @JsonBackReference
     private User user;
+
+    @OneToMany(mappedBy = "question")
+    private List<Answer> answerList = new ArrayList<Answer>();
 }
