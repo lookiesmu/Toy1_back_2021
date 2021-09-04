@@ -1,0 +1,18 @@
+spring:
+  datasource:
+    dherokuriver-class-name: com.mysql.cj.jdbc.Driver
+    url: "jdbc:mysql://bf091bd5989c74:1b10250c@us-cdbr-east-04.cleardb.com/her
+               oku_4ed1f6ef563b21b?reconnect=true/tome?reconnect=true&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul&useSSL=false&useUnicode=true&characterEncoding=UTF-8"
+
+    username: bf091bd5989c74
+    password: :1b10250c
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+jwt:
+  secret: govlepel@$&
+
+server:
+  port=${PORT:32500}:
