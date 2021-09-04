@@ -7,6 +7,7 @@ import com.lookie.toy1_back.tome.repository.AnswerRepository;
 import com.lookie.toy1_back.tome.repository.QuestionRepository;
 import com.lookie.toy1_back.tome.repository.UserRepository;
 import com.lookie.toy1_back.tome.request.AnswerCreateRequest;
+import com.lookie.toy1_back.tome.request.AnswerUpdateRequest;
 import com.lookie.toy1_back.tome.request.QuestionCreateRequest;
 
 import lombok.RequiredArgsConstructor;
@@ -48,7 +49,7 @@ public class AnswerService {
         answerRepository.delete(answerRepository.getById(answerId));
     }
 
-    public Answer updateAnswer (Long answerId, AnswerCreateRequest request) {
+    public Answer updateAnswer (Long answerId, AnswerUpdateRequest request) {
 
         Optional<Answer> findAnswer = answerRepository.findById(answerId);
 

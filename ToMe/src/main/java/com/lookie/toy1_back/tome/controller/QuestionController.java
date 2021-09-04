@@ -7,6 +7,7 @@ import com.lookie.toy1_back.tome.repository.AnswerRepository;
 import com.lookie.toy1_back.tome.repository.QuestionRepository;
 import com.lookie.toy1_back.tome.repository.UserRepository;
 import com.lookie.toy1_back.tome.request.AnswerCreateRequest;
+import com.lookie.toy1_back.tome.request.AnswerUpdateRequest;
 import com.lookie.toy1_back.tome.request.QuestionCreateRequest;
 import com.lookie.toy1_back.tome.service.AnswerService;
 import com.lookie.toy1_back.tome.service.QuestionService;
@@ -80,7 +81,7 @@ public class QuestionController {
     }
 
     @PutMapping("/{questionId}/answer/{answerId}")
-    public ResponseEntity<Void> updateAnswer (@PathVariable Long answerId, @RequestBody AnswerCreateRequest request) {
+    public ResponseEntity<Void> updateAnswer (@PathVariable Long answerId, @RequestBody AnswerUpdateRequest request) {
         answerService.updateAnswer(answerId, request);
         return ResponseEntity.ok().build();
     }
