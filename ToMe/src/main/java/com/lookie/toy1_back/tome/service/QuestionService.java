@@ -62,10 +62,13 @@ public class QuestionService {
         }
 
         Question question = optionalQuestion.get();
+        Question questionToUpdate = new Question();
+        BeanUtils.copyProperties(question, questionToUpdate);
 
-        question.setContent(request.getContent());
+        questionToUpdate.setContent(request.getContent());
+        questionToUpdate.setQ_num(question.getQ_num());
 
-        return questionRepository.save(question);
+        return questionRepository.save(questionToUpdate);
     }
 
 

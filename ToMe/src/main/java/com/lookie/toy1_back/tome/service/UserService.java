@@ -7,6 +7,7 @@ import com.lookie.toy1_back.tome.repository.QuestionRepository;
 import com.lookie.toy1_back.tome.repository.UserRepository;
 import com.lookie.toy1_back.tome.request.QuestionCreateRequest;
 import com.lookie.toy1_back.tome.request.UserCreateRequest;
+import com.lookie.toy1_back.tome.request.UserUpdateRequest;
 import com.lookie.toy1_back.tome.role.UserRole;
 import lombok.RequiredArgsConstructor;
 import org.apache.catalina.Store;
@@ -15,6 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityNotFoundException;
+import javax.validation.Valid;
 import java.util.*;
 
 
@@ -63,4 +65,29 @@ public class UserService {
     public boolean checkPassword(User member, User user) {
         return passwordEncoder.matches(user.getPassword(), member.getPassword());
     }
+
+    public User updateUser (Long id, UserUpdateRequest request) {
+        Optional<User> optionalUser = userRepository.findById(id);
+
+        if (!optionalUser.isPresent()) {
+            throw new EntityNotFoundException(
+                    "데이터 베이스에 해당하는 유저가 없습니다.");
+        }
+
+        System.out.println(request.getName());
+
+        User user = optionalUser.get();
+        User userToUpdate = new User();
+
+        BeanUtils.copyProperties(user, userToUpdate);
+
+        userToUpdate.setU_num(optionalUser.get().getU_num());
+        userToUpdate.setUsername(optionalUser.get().getUsername());
+        userToUpdate.setName(request.getName());
+        userToUpdate.setPhone(request.getPhone());
+        userToUpdate.setPassword(request.getPassword());
+
+        return userRepository.save(userToUpdate);
+    }
+
 }

@@ -48,17 +48,23 @@ public class AnswerService {
         answerRepository.delete(answerRepository.getById(answerId));
     }
 
-    public Answer updateAnswer (Long answerId,@Valid AnswerCreateRequest request) {
+    public Answer updateAnswer (Long answerId, AnswerCreateRequest request) {
 
         Optional<Answer> findAnswer = answerRepository.findById(answerId);
 
-        if ( findAnswer.isPresent() ) {
+        if ( !findAnswer.isPresent() ) {
             throw new EntityNotFoundException(
                     "데이터 베이스에 해당하는 답변이 없습니다.");
         }
         Answer answer = findAnswer.get();
-        answer.setContent(request.getContent());
-        return answerRepository.save(answer);
+
+        Answer answerToUpdate = new Answer();
+        BeanUtils.copyProperties(answer, answerToUpdate);
+
+        answerToUpdate.setContent(request.getContent());
+        answerToUpdate.setA_num(answer.getA_num());
+
+        return answerRepository.save(answerToUpdate);
     }
 
     public void checkVlidateAnswer(Long userId, Long questionId) {
