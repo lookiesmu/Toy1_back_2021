@@ -1,16 +1,21 @@
 package com.lookie.toy1_back.tome.controller;
 
 import com.lookie.toy1_back.tome.assembler.UserModelAssembler;
+import com.lookie.toy1_back.tome.config.JwtTokenProvider;
 import com.lookie.toy1_back.tome.domain.User;
 import com.lookie.toy1_back.tome.exception.UserNotFoundException;
 import com.lookie.toy1_back.tome.repository.UserRepository;
 import com.lookie.toy1_back.tome.role.UserRole;
+import com.lookie.toy1_back.tome.service.UserService;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 import java.util.List;
 import java.util.stream.Collectors;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
@@ -18,10 +23,16 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 public class UserController {
     private final UserRepository repository;
     private final UserModelAssembler assembler;
+    private final JwtTokenProvider jwtTokenProvider;
+    private final UserService userService;
+    private final PasswordEncoder passwordEncoder;
 
-    UserController(UserRepository repository, UserModelAssembler assembler){
+    UserController(UserRepository repository, UserModelAssembler assembler, JwtTokenProvider jwtTokenProvider, UserService userService, PasswordEncoder passwordEncoder){
         this.repository = repository;
         this.assembler = assembler;
+        this.jwtTokenProvider = jwtTokenProvider;
+        this.userService = userService;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @GetMapping("/users")
@@ -32,23 +43,47 @@ public class UserController {
         return CollectionModel.of(users, linkTo(methodOn(UserController.class).all()).withSelfRel());
     }
 
-    @PostMapping("/user")
-    ResponseEntity<?> newUser(@RequestBody User newUser){
+    @PostMapping("/signup/user")
+    ResponseEntity<?> newUser(@Valid @RequestBody User newUser){
+        checkUserNameDuplicate(newUser.getUsername());
         newUser.setRole(UserRole.USER);
+        newUser.setPassword(passwordEncoder.encode(newUser.getPassword()));
         EntityModel<User> entityModel = assembler.toModel(repository.save(newUser));
         return ResponseEntity
                 .created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri())
                 .body(entityModel);
     }
 
-    @PostMapping("/admin")
-    ResponseEntity<?> newAdmin(@RequestBody User newUser){
+
+    @PostMapping("/signup/admin")
+    ResponseEntity<?> newAdmin(@Valid @RequestBody User newUser){
+        checkUserNameDuplicate(newUser.getUsername());
         newUser.setRole(UserRole.ADMIN);
+        newUser.setPassword(passwordEncoder.encode(newUser.getPassword()));
         EntityModel<User> entityModel = assembler.toModel(repository.save(newUser));
         return ResponseEntity
                 .created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri())
                 .body(entityModel);
     }
+
+
+    // 로그인
+    @PostMapping("/login")
+    public ResponseEntity login(@RequestBody User user, HttpServletResponse response) {
+        // 유저 존재 확인
+        User member = userService.findUser(user);
+        boolean checkResult = userService.checkPassword(member, user);
+        // 비밀번호 체크
+        if(!checkResult) {
+            throw new IllegalArgumentException("아이디 혹은 비밀번호가 잘못되었습니다.");
+        }
+        // 토큰 생성 및 응답
+        String token = jwtTokenProvider.createToken(member.getUsername(), member.getRole());
+        response.setHeader("authorization", "bearer " + token);
+        return ResponseEntity.ok().body("로그인 성공!");
+
+    }
+
 
     @GetMapping("/user/{id}")
     public EntityModel<User> one(@PathVariable Long id){
@@ -58,7 +93,7 @@ public class UserController {
     }
 
     @PutMapping("/user/{id}")
-    ResponseEntity<?> replaceUser(@RequestBody User newUser, @PathVariable Long id){
+    ResponseEntity<?> replaceUser(@Valid @RequestBody User newUser, @PathVariable Long id){
         User updatedUser = repository.findById(id)
                 .map(user -> {
                     user.setUsername(newUser.getUsername());
@@ -66,7 +101,7 @@ public class UserController {
                     return repository.save(user);
                 })
                 .orElseGet(() -> {
-                    newUser.setId(id);
+                    newUser.setU_num(id);
                     return repository.save(newUser);
                 });
         EntityModel<User> entityModel = assembler.toModel(updatedUser);
@@ -82,5 +117,12 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
-
+    public void checkUserNameDuplicate(String username) {
+        List<User> user = repository.findAll();
+        for (User findUser: user) {
+            if ( findUser.getUsername().equals(username)) {
+                throw new IllegalStateException("이미 존재하는 ID입니다.");
+            }
+        }
+    }
 }

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 
 @Entity
@@ -17,8 +18,9 @@ import java.io.Serializable;
 public class Answer extends BaseTime implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long a_num;
 
+    @NotBlank(message = "답변을 입력해주세요")
     @Column
     private String content;
 

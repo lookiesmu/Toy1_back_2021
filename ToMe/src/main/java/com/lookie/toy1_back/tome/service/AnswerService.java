@@ -14,6 +14,8 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityNotFoundException;
+import javax.validation.Valid;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -26,8 +28,11 @@ public class AnswerService {
 
     private final QuestionService questionService;
 
-    public Answer createAnswer(Long questionId,AnswerCreateRequest answer) {
-        Optional<User> userForId = userRepository.findById(answer.getUserId());
+    public Answer createAnswer(Long questionId,@Valid AnswerCreateRequest answer) {
+
+        checkVlidateAnswer(answer.getU_num(), questionId);
+
+        Optional<User> userForId = userRepository.findById(answer.getU_num());
         Optional<Question> questionForId = questionRepository.findById(questionId);
 
         Answer answerToCreate = new Answer();
@@ -39,28 +44,33 @@ public class AnswerService {
         return answerRepository.save(answerToCreate);
     }
 
-    public void deleteAnswer(Long questionId, Long answerId) {
-
-        Optional<Question> questionForId = questionRepository.findById(questionId);
-
-        Long getId = questionForId.get().getAnswerList().get(Math.toIntExact(answerId)).getId();
-        questionForId.get().getAnswerList().removeIf( n -> n.equals(getId) );
-
-        questionRepository.save(questionForId.get());
+    public void deleteAnswer(Long answerId) {
+        answerRepository.delete(answerRepository.getById(answerId));
     }
 
-    public Answer updateAnswer (Long questionId, Long answerid, AnswerCreateRequest request) {
+    public Answer updateAnswer (Long answerId,@Valid AnswerCreateRequest request) {
 
-        Optional<Question> questionForId = questionRepository.findById(questionId);
-        Answer findAnswer = questionForId.get().getAnswerList().get(Math.toIntExact(answerid));
+        Optional<Answer> findAnswer = answerRepository.findById(answerId);
 
-        if ( findAnswer == null ) {
+        if ( findAnswer.isPresent() ) {
             throw new EntityNotFoundException(
                     "데이터 베이스에 해당하는 답변이 없습니다.");
         }
+        Answer answer = findAnswer.get();
+        answer.setContent(request.getContent());
+        return answerRepository.save(answer);
+    }
 
-        findAnswer.setContent(request.getContent());
+    public void checkVlidateAnswer(Long userId, Long questionId) {
+        User user = userRepository.getById(userId);
+        Question question = questionRepository.getById(questionId);
 
-        return answerRepository.save(findAnswer);
+        List<Answer> answers = user.getAnswerList();
+        for (Answer answer : answers) {
+            Question findQuestion = answer.getQuestion();
+            if ( question.getQ_num().equals(findQuestion.getQ_num() )) {
+                throw new IllegalStateException("이미 답변한 질문입니다.");
+            }
+        }
     }
 }

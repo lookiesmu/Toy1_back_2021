@@ -70,20 +70,18 @@ public class QuestionController {
 
     @GetMapping("/{questionId}/answer/{answerId}")
     public ResponseEntity<?> getAnswer (@PathVariable Long questionId,@PathVariable Long answerId) {
-        return ResponseEntity.ok(questionRepository.getById(questionId).getAnswerList().get(Math.toIntExact(answerId)));
+        return ResponseEntity.ok(questionRepository.getById(questionId).getAnswerList().get(Math.toIntExact(answerId)-1));
     }
 
-
-
     @DeleteMapping("/{questionId}/answer/{answerId}")
-    public ResponseEntity<Void> deleteAnswer (@PathVariable Long questionId, @PathVariable Long answerId) {
-        answerService.deleteAnswer(questionId, answerId);
+    public ResponseEntity<Void> deleteAnswer (@PathVariable Long answerId) {
+        answerService.deleteAnswer(answerId);
         return ResponseEntity.ok().build();
     }
 
     @PutMapping("/{questionId}/answer/{answerId}")
-    public ResponseEntity<Void> updateAnswer (@PathVariable Long questionId, @PathVariable Long answerId, AnswerCreateRequest request) {
-        answerService.updateAnswer(questionId, answerId, request);
+    public ResponseEntity<Void> updateAnswer (@PathVariable Long answerId, AnswerCreateRequest request) {
+        answerService.updateAnswer(answerId, request);
         return ResponseEntity.ok().build();
     }
 }

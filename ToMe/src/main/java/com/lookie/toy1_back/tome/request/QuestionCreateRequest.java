@@ -5,5 +5,5 @@ import lombok.Data;
 @Data
 public class QuestionCreateRequest {
     private String content;
-    private Long userId;
+    private Long u_num;
 }

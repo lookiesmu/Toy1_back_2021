@@ -13,6 +13,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityNotFoundException;
+import javax.validation.Valid;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,9 +28,9 @@ public class QuestionService {
     private final QuestionRepository questionRepository;
     private final UserRepository userRepository;
 
-    public Question createQuestion(QuestionCreateRequest question) {
+    public Question createQuestion(@Valid QuestionCreateRequest question) {
 
-        Optional<User> userForId = userRepository.findById(question.getUserId());
+        Optional<User> userForId = userRepository.findById(question.getU_num());
 
         if (!userForId.isPresent()) {
             throw new EntityNotFoundException("해당하는 유저가 없습니다.");
@@ -53,7 +54,7 @@ public class QuestionService {
         questionRepository.deleteById(id);
     }
 
-    public Question updateQuestion (Long id, QuestionCreateRequest request) {
+    public Question updateQuestion (Long id, @Valid QuestionCreateRequest request) {
         Optional<Question> optionalQuestion = questionRepository.findById(id);
         if (!optionalQuestion.isPresent()) {
             throw new EntityNotFoundException(

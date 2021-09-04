@@ -6,9 +6,11 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.*;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+
 
 @Entity
 @Table
@@ -20,8 +22,9 @@ import java.util.List;
 public class Question extends BaseTime implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long q_num;
 
+    @NotBlank(message = "질문을 입력해주세요.")
     @Column
     private String content;
 
