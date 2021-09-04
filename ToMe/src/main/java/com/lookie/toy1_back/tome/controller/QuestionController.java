@@ -53,7 +53,7 @@ public class QuestionController {
     }
 
     @PutMapping("/{questionId}")
-    public ResponseEntity<Void> updateQuestion (@PathVariable Long questionId, QuestionCreateRequest request) {
+    public ResponseEntity<Void> updateQuestion (@PathVariable Long questionId, @RequestBody QuestionCreateRequest request) {
         questionService.updateQuestion(questionId, request);
         return ResponseEntity.ok().build();
     }
@@ -69,8 +69,8 @@ public class QuestionController {
     }
 
     @GetMapping("/{questionId}/answer/{answerId}")
-    public ResponseEntity<?> getAnswer (@PathVariable Long questionId,@PathVariable Long answerId) {
-        return ResponseEntity.ok(questionRepository.getById(questionId).getAnswerList().get(Math.toIntExact(answerId)-1));
+    public ResponseEntity<?> getAnswer (@PathVariable Long answerId) {
+        return ResponseEntity.ok(answerRepository.getById(answerId));
     }
 
     @DeleteMapping("/{questionId}/answer/{answerId}")
@@ -80,7 +80,7 @@ public class QuestionController {
     }
 
     @PutMapping("/{questionId}/answer/{answerId}")
-    public ResponseEntity<Void> updateAnswer (@PathVariable Long answerId, AnswerCreateRequest request) {
+    public ResponseEntity<Void> updateAnswer (@PathVariable Long answerId, @RequestBody AnswerCreateRequest request) {
         answerService.updateAnswer(answerId, request);
         return ResponseEntity.ok().build();
     }

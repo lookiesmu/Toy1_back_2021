@@ -5,6 +5,8 @@ import com.lookie.toy1_back.tome.config.JwtTokenProvider;
 import com.lookie.toy1_back.tome.domain.User;
 import com.lookie.toy1_back.tome.exception.UserNotFoundException;
 import com.lookie.toy1_back.tome.repository.UserRepository;
+import com.lookie.toy1_back.tome.request.UserCreateRequest;
+import com.lookie.toy1_back.tome.request.UserUpdateRequest;
 import com.lookie.toy1_back.tome.role.UserRole;
 import com.lookie.toy1_back.tome.service.UserService;
 import org.springframework.hateoas.CollectionModel;
@@ -19,6 +21,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 @RestController
@@ -105,22 +108,9 @@ public class UserController {
     }
 
     @PutMapping("/user/{id}")
-    ResponseEntity<?> replaceUser(@Valid @RequestBody User newUser, @PathVariable Long id){
-        User updatedUser = repository.findById(id)
-                .map(user -> {
-                    user.setUsername(newUser.getUsername());
-                    user.setRole(newUser.getRole());
-                    return repository.save(user);
-                })
-                .orElseGet(() -> {
-                    newUser.setU_num(id);
-                    return repository.save(newUser);
-                });
-        EntityModel<User> entityModel = assembler.toModel(updatedUser);
-
-        return ResponseEntity
-                .created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri())
-                .body(entityModel);
+    ResponseEntity<?> updateUser(@RequestBody UserUpdateRequest userUpdateRequest, @PathVariable Long id){
+        userService.updateUser(id, userUpdateRequest);
+        return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/user/{id}")
